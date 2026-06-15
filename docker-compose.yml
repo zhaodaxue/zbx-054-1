@@ -1,0 +1,40 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: zbx-sandbox-frontend:latest
+    container_name: zbx-sandbox-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - zbx-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: zbx-sandbox-backend:latest
+    container_name: zbx-sandbox-backend
+    expose:
+      - "3001"
+    environment:
+      - NODE_ENV=production
+      - DATA_DIR=/app/api/data
+    volumes:
+      - zbx-data:/app/api/data
+    restart: unless-stopped
+    networks:
+      - zbx-net
+
+volumes:
+  zbx-data:
+    name: zbx-sandbox-data
+
+networks:
+  zbx-net:
+    name: zbx-sandbox-net
+    driver: bridge

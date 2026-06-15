@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  background:
+    radial-gradient(1200px 800px at 15% -10%, rgba(59,130,246,0.18), transparent 60%),
+    radial-gradient(900px 700px at 110% 10%, rgba(249,115,22,0.10), transparent 60%),
+    linear-gradient(180deg, #060b1d 0%, #0b1226 40%, #0a0f21 100%);
+  color: #e5e7eb;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .font-display {
+    font-family: 'Orbitron', system-ui, sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .panel {
+    @apply bg-slate-900/55 backdrop-blur-md border border-slate-700/60 rounded-2xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)];
+  }
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 select-none;
+  }
+  .btn-primary {
+    @apply btn bg-power-700 hover:bg-power-600 text-white shadow-glow-blue hover:shadow-[0_0_28px_rgba(59,130,246,0.6)];
+  }
+  .btn-ghost {
+    @apply btn bg-slate-800/60 hover:bg-slate-700/70 text-slate-200 border border-slate-600/60;
+  }
+  .btn-danger {
+    @apply btn bg-status-danger/90 hover:bg-status-danger text-white shadow-glow-danger;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold;
+  }
+  .status-dot {
+    @apply inline-block w-2.5 h-2.5 rounded-full animate-pulseDot;
+  }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.35); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.6); }

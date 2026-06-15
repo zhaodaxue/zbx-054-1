@@ -14,6 +14,7 @@ import AppHeader from "@/components/AppHeader";
 import AreaCard from "@/components/AreaCard";
 import LoadPool from "@/components/LoadPool";
 import MonitorPanel from "@/components/MonitorPanel";
+import AssessmentPanel from "@/components/AssessmentPanel";
 import DraggableLoadBlock from "@/components/DraggableLoadBlock";
 import { useSandboxStore } from "@/store/sandboxStore";
 import { DEFAULT_AREAS, DEFAULT_LOADS } from "@shared/initialData";
@@ -25,12 +26,13 @@ import type { OperationLog } from "@shared/types";
 import { Link } from "react-router-dom";
 
 export default function SandboxPage() {
-  const { areas, loads, assignments, areaLoads, sessionId, readOnly } =
+  const { areas, loads, assignments, areaLoads, sessionId, readOnly, assessed } =
     useSandboxStore();
   const init = useSandboxStore((s) => s.init);
   const moveLoad = useSandboxStore((s) => s.moveLoad);
   const setSessionId = useSandboxStore((s) => s.setSessionId);
   const reset = useSandboxStore((s) => s.reset);
+  const submitAssessment = useSandboxStore((s) => s.submitAssessment);
 
   const [activeLoad, setActiveLoad] = useState<LoadBlock | null>(null);
   const [toast, setToast] = useState<string>("");
@@ -88,6 +90,11 @@ export default function SandboxPage() {
     } finally {
       setLogPending(false);
     }
+  };
+
+  const onSubmitAssessment = () => {
+    submitAssessment();
+    showToast("🎯 考核提交成功！三项目标全部达成，沙盘已锁定。点击「重置」可重新开始。");
   };
 
   const onDragStart = (e: DragStartEvent) => {
@@ -190,7 +197,15 @@ export default function SandboxPage() {
               </div>
             </div>
             <div>
-              <MonitorPanel areas={areas} infos={areaLoads} />
+              <div className="space-y-5">
+                <MonitorPanel areas={areas} infos={areaLoads} />
+                <AssessmentPanel
+                  areas={areas}
+                  infos={areaLoads}
+                  assessed={assessed}
+                  onSubmit={onSubmitAssessment}
+                />
+              </div>
             </div>
           </div>
 

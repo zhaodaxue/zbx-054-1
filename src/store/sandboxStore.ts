@@ -20,6 +20,7 @@ interface SandboxState {
   assignments: LoadAssignment[];
   areaLoads: AreaLoadInfo[];
   readOnly: boolean;
+  assessed: boolean;
 
   init: (
     areas: TransformerArea[],
@@ -37,6 +38,8 @@ interface SandboxState {
 
   applyLogs: (logs: OperationLog[], stepCount: number) => void;
 
+  submitAssessment: () => void;
+
   reset: (opts?: { keepSessionId?: boolean }) => void;
 }
 
@@ -51,6 +54,7 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
   assignments: [],
   areaLoads: [],
   readOnly: false,
+  assessed: false,
 
   init: (areas, loads, sessionId = null, readOnly = false) => {
     const assignments = buildAssignments(loads);
@@ -60,6 +64,7 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
       assignments,
       sessionId,
       readOnly,
+      assessed: false,
       ...recalc({ areas, loads, assignments }),
     });
   },
@@ -118,12 +123,17 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
     });
   },
 
+  submitAssessment: () => {
+    set({ assessed: true, readOnly: true });
+  },
+
   reset: (opts) => {
     const { areas, loads } = get();
     const assignments = buildAssignments(loads);
     set({
       assignments,
       readOnly: false,
+      assessed: false,
       sessionId: opts?.keepSessionId ? get().sessionId : null,
       ...recalc({ areas, loads, assignments }),
     });

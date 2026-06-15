@@ -67,9 +67,9 @@ export default function SandboxPage() {
         initialLoads: DEFAULT_LOADS,
       });
       setSessionId(ses.id);
-      showToast(`已创建演练会话：${ses.name}`);
+      showToast(`✅ 已创建演练会话：${ses.name}`);
     } catch (e) {
-      showToast(`创建会话失败：${e instanceof Error ? e.message : e}`);
+      showToast(`❌ 创建会话失败：${e instanceof Error ? e.message : e}`);
     } finally {
       setCreating(false);
     }
@@ -82,6 +82,8 @@ export default function SandboxPage() {
       setLogPending(true);
       await apiClient.submitLog(payload);
     } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast(`❌ 日志提交失败：${msg}`);
       console.warn("submit log failed", e);
     } finally {
       setLogPending(false);
@@ -108,7 +110,7 @@ export default function SandboxPage() {
 
     const sid = sessionId;
     if (!sid) {
-      showToast("操作已记录，但未创建会话（日志不会写入服务端）。点击「新演练会话」创建。");
+      showToast("⚠ 未创建演练会话，本次拖拽仅本地生效，不会写入服务端日志。请点击右上角「新演练会话」。");
       return;
     }
     submitLog({
@@ -134,8 +136,8 @@ export default function SandboxPage() {
       <AppHeader
         sessionLabel={sessionLabel}
         onReset={() => {
-          reset();
-          showToast("沙盘已重置为初始状态");
+          reset({ keepSessionId: true });
+          showToast(sessionId ? "✅ 沙盘布局已重置（当前会话保留，可继续操作）" : "✅ 沙盘布局已重置");
         }}
         extra={
           <>

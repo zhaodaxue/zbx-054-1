@@ -51,7 +51,9 @@ export default function AreaCard({ area, info, disabled }: Props) {
   });
 
   const s = statusClasses(info.status);
-  const pct = Math.min(100, info.loadRate * 100);
+  const rawPct = info.loadRate * 100;
+  const pct = Math.min(100, rawPct);
+  const overPct = Math.max(0, rawPct - 100);
 
   return (
     <div
@@ -150,7 +152,7 @@ export default function AreaCard({ area, info, disabled }: Props) {
           <span className="text-slate-400 font-mono">
             {info.status === "danger" && (
               <span className="text-status-danger font-semibold mr-2">
-                ⚠ 超载 {(pct - 100).toFixed(0)}%
+                ⚠ 超载 {overPct.toFixed(0)}%
               </span>
             )}
             {info.status === "warn" && pct >= OVERLOAD_WARN * 100 && (

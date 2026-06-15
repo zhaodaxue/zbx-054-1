@@ -19,7 +19,7 @@ import {
   Home,
   RefreshCcw,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import AppHeader from "@/components/AppHeader";
 import AreaCard from "@/components/AreaCard";
 import LoadPool from "@/components/LoadPool";
@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 const SPEEDS = [0.5, 1, 2, 4] as const;
 
 export default function ReplayPage() {
-  const { areas, loads, areaLoads, assignments, init, applyLogs, sessionId, setSessionId } =
+  const { areas, loads, areaLoads, assignments, init, applyLogs, reset } =
     useSandboxStore();
 
   const [params] = useSearchParams();
@@ -46,6 +46,7 @@ export default function ReplayPage() {
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(1);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(initialSession);
+  const [sessionLoaded, setSessionLoaded] = useState(false);
 
   const timer = useRef<number | null>(null);
   const sensors = useSensors(
@@ -61,7 +62,10 @@ export default function ReplayPage() {
   const currentLog = step > 0 ? logs[step - 1] : undefined;
 
   useEffect(() => {
+    reset();
+    setSessionLoaded(false);
     apiClient.listSessions().then(setSessions).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -92,15 +96,17 @@ export default function ReplayPage() {
   const loadSession = async (id: string) => {
     try {
       setLoading(true);
+      setPlaying(false);
+      setSessionLoaded(false);
       const session = await apiClient.getSession(id);
       if (!session) return;
-      init(session.areas, session.initialLoads, id, true);
-      setSessionId(id);
+      init(session.areas, session.initialLoads, null, true);
       setSelectedId(id);
       const list = await apiClient.getSessionLogs(id);
       setLogs(list);
       setStep(0);
-      setPlaying(false);
+      applyLogs(list, 0);
+      setSessionLoaded(true);
     } finally {
       setLoading(false);
     }
@@ -306,43 +312,46 @@ export default function ReplayPage() {
               )}
             </div>
 
-            {totalSteps === 0 && !loading && (
+            {!sessionLoaded && !loading && totalSteps === 0 && (
               <div className="panel p-12 text-center">
                 <SearchX className="w-14 h-14 mx-auto text-slate-500 mb-3" />
                 <h3 className="font-display text-xl text-slate-300 mb-2">
-                  暂无操作日志可回放
+                  {selectedId ? "该会话暂无操作日志" : "暂无操作日志可回放"}
                 </h3>
                 <p className="text-sm text-slate-500 max-w-md mx-auto mb-5">
-                  请先前往演练沙盘页，点击「新演练会话」开始拖拽操作；
-                  完成后返回此处选择对应会话即可回放。
+                  {selectedId
+                    ? "当前选中的会话没有产生任何操作记录。"
+                    : "请先前往演练沙盘页，点击「新演练会话」开始拖拽操作；完成后返回此处选择对应会话即可回放。"}
                 </p>
-                <a href="/sandbox" className="btn-primary inline-flex">
+                <Link to="/sandbox" className="btn-primary inline-flex">
                   <Home className="w-4 h-4" /> 前往演练沙盘
-                </a>
+                </Link>
               </div>
             )}
 
-            <DndContext sensors={sensors} collisionDetection={closestCenter}>
-              <LoadPool loads={poolLoads} disabled />
-              <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
-                {areas.map((area, i) => (
-                  <AreaCard
-                    key={area.id}
-                    area={area}
-                    info={areaLoads[i] ?? {
-                      areaId: area.id,
-                      currentPower: 0,
-                      maxPower: area.maxPower,
-                      loadRate: 0,
-                      status: "ok",
-                      loads: [],
-                    }}
-                    disabled
-                  />
-                ))}
-              </div>
-              <DragOverlay />
-            </DndContext>
+            {sessionLoaded && (
+              <DndContext sensors={sensors} collisionDetection={closestCenter}>
+                <LoadPool loads={poolLoads} disabled />
+                <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
+                  {areas.map((area, i) => (
+                    <AreaCard
+                      key={area.id}
+                      area={area}
+                      info={areaLoads[i] ?? {
+                        areaId: area.id,
+                        currentPower: 0,
+                        maxPower: area.maxPower,
+                        loadRate: 0,
+                        status: "ok",
+                        loads: [],
+                      }}
+                      disabled
+                    />
+                  ))}
+                </div>
+                <DragOverlay />
+              </DndContext>
+            )}
           </div>
 
           <div className="space-y-5">

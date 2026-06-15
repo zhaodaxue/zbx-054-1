@@ -37,7 +37,7 @@ interface SandboxState {
 
   applyLogs: (logs: OperationLog[], stepCount: number) => void;
 
-  reset: () => void;
+  reset: (opts?: { keepSessionId?: boolean }) => void;
 }
 
 function recalc(state: Pick<SandboxState, "areas" | "loads" | "assignments">) {
@@ -118,11 +118,13 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
     });
   },
 
-  reset: () => {
+  reset: (opts) => {
     const { areas, loads } = get();
     const assignments = buildAssignments(loads);
     set({
       assignments,
+      readOnly: false,
+      sessionId: opts?.keepSessionId ? get().sessionId : null,
       ...recalc({ areas, loads, assignments }),
     });
   },
